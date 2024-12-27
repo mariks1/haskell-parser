@@ -1,15 +1,48 @@
-<note>
-    <to>
-      Tove
-    </to>
-    <from>
-      Jani
-    </from>
-    <heading>
-      Reminder
-    </heading>
-    <body>
-      Don't forget me this weekend!
-    </body>
+<users>
+    <id>
+      1.0
+    </id>
+    <name>
+      User One
+    </name>
+    <roles>
+        admin        editor
+    </roles>
+    <profile>
+      <age>
+        34.0
+      </age>
+      <location>
+        New York
+      </location>
 
-</note>
+    </profile>
+    <id>
+      2.0
+    </id>
+    <name>
+      User Two
+    </name>
+    <roles>
+        user
+    </roles>
+    <profile>
+      <age>
+        28.0
+      </age>
+      <location>
+        San Francisco
+      </location>
+
+    </profile>
+
+</users>
+<settings>
+  <theme>
+    dark
+  </theme>
+  <notifications>
+    true
+  </notifications>
+
+</settings>

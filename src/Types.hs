@@ -1,4 +1,4 @@
-module Types where
+module Types (Node (..)) where
 
 data Node
   = NString String
