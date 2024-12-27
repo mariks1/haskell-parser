@@ -1,0 +1,15 @@
+name: John
+age: 30
+isMarried: false
+children:
+  - Alice
+  - Bob
+  - Carol
+pets: null
+address:
+  street: "Main St."
+  city: "NY"
+scores:
+  - 10
+  - 11
+  - 12

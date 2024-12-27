@@ -1,9 +1,10 @@
 module Main (main) where
 
 import Control.DeepSeq (deepseq)
-import Converter (nodeToJSON, prettyNodeToXML)
+import Converter (nodeToJSON, nodeToYAML, prettyNodeToXML)
 import Parser.JSON (parseJSON)
 import Parser.XML (parseXML)
+import Parser.YAML (parseYAML)
 import System.Environment (getArgs)
 import System.FilePath (takeExtension)
 import System.IO (hFlush, hGetContents, stdin, stdout)
@@ -14,16 +15,16 @@ main = do
 
   (inputSource, inputFormat) <- case args of
     [] -> do
-      putStrLn "Reading input from stdin. Enter input format (.xml or .json):"
+      putStrLn "Reading input from stdin. Enter input format (.xml, .json or .yaml):"
       fmt <- getLine
       pure (Left stdin, fmt)
     [inputFile] | inputFile == "_" -> do
-      putStrLn "Reading input from stdin. Enter input format (.xml or .json):"
+      putStrLn "Reading input from stdin. Enter input format (.xml, .json or .yaml):"
       fmt <- getLine
       pure (Left stdin, fmt)
     [inputFile] -> pure (Right inputFile, takeExtension inputFile)
     [inputFile, _] | inputFile == "_" -> do
-      putStrLn "Reading input from stdin. Enter input format (.xml or .json):"
+      putStrLn "Reading input from stdin. Enter input format (.xml, .json or .yaml):"
       fmt <- getLine
       pure (Left stdin, fmt)
     [inputFile, _] -> pure (Right inputFile, takeExtension inputFile)
@@ -32,11 +33,11 @@ main = do
   outputFormat <- case args of
     ["_", outputFile] -> pure (takeExtension outputFile)
     [] -> do
-      putStrLn "Enter output format (.xml or .json):"
+      putStrLn "Enter output format (.xml, .json or .yaml):"
       getLine
     [_, outputFile] -> pure (takeExtension outputFile)
     [_] -> do
-      putStrLn "Enter output format (.xml or .json):"
+      putStrLn "Enter output format (.xml, .json or .yaml):"
       getLine
     _ -> error "Invalid arguments. Usage: lab4-exe [inputFile] [outputFile]"
 
@@ -56,11 +57,13 @@ main = do
   let parsedData = case inputFormat of
         ".xml" -> parseXML input
         ".json" -> parseJSON input
-        _ -> error "Unsupported input format. Use .xml or .json"
+        ".yaml" -> parseYAML input
+        _ -> error "Unsupported input format. Use .xml, .json or .yaml"
 
   let output = case outputFormat of
         ".xml" -> prettyNodeToXML parsedData
         ".json" -> nodeToJSON parsedData
+        ".yaml" -> nodeToYAML parsedData
         _ -> error "Unsupported output format. Use .xml or .json"
 
   case args of
