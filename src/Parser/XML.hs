@@ -1,154 +1,82 @@
 module Parser.XML where
 
-import System.Environment (getArgs)
-import System.Exit (die)
-import System.IO (readFile, writeFile)
-import Data.Char (isSpace)
-import Control.Applicative ((<|>))
-import Control.Monad (void, guard)
-import Data.List (isPrefixOf)
-import Types
--- Конвертация XML в Node
-xmlToNode :: XML -> Node
-xmlToNode (XText text) = NString text
-xmlToNode (XElem name attrs children) =
-    NObject $
-        [("tag", NString name)] ++
-        [("attributes", attrsToNode attrs)] ++
-        [("children", childrenToNode children)]
+import Types (Node(..))
+import Data.Char (isSpace, isAlphaNum)
 
-attrsToNode :: [(String, String)] -> Node
-attrsToNode attrs = NObject $ map (\(k,v) -> (k, NString v)) attrs
+skipSpaces :: String -> String
+skipSpaces = dropWhile isSpace
 
-childrenToNode :: [XML] -> Node
-childrenToNode children = NArray (map xmlToNode children)
+spanWhile :: (Char -> Bool) -> String -> (String, String)
+spanWhile _     []     = ([], [])
+spanWhile predc (x:xs)
+  | predc x    = let (ys, zs) = spanWhile predc xs in (x:ys, zs)
+  | otherwise  = ([], x:xs)
 
--- Метод для преобразования Node обратно в XML
-nodeToXML :: Node -> String
-nodeToXML (NObject fields) =
-    case lookup "tag" fields of
-        Just (NString tagName) ->
-            let attributes = case lookup "attributes" fields of
-                                Just (NObject attrs) -> attrs
-                                _ -> []
-                children = case lookup "children" fields of
-                                Just (NArray childs) -> childs
-                                _ -> []
-                attrsStr = concatMap (\(k, NString v) -> " " ++ k ++ "=\"" ++ escape v ++ "\"") attributes
-                childrenStr = concatMap nodeToXML children
-            in "<" ++ tagName ++ attrsStr ++ ">" ++ childrenStr ++ "</" ++ tagName ++ ">"
-        _ -> ""
-nodeToXML (NString text) = escape text
-nodeToXML _ = ""
+parseXML :: String -> Node
+parseXML str =
+  let (node, _) = parseElement (skipSpaces str)
+  in node
 
--- Функция для экранирования специальных символов в XML
-escape :: String -> String
-escape = concatMap escapeChar
-  where
-    escapeChar '<'  = "&lt;"
-    escapeChar '>'  = "&gt;"
-    escapeChar '&'  = "&amp;"
-    escapeChar '"'  = "&quot;"
-    escapeChar '\'' = "&apos;"
-    escapeChar c    = [c]
+parseElement :: String -> (Node, String)
+parseElement input =
+  let
 
--- Простая функция для преобразования XML в строку с отступами (для читаемости)
-prettyPrintXML :: String -> String
-prettyPrintXML xmlStr = unlines $ prettyLines 0 (nodeToXML $ xmlToNode parsedXML)
-  where
-    parsedXML = case parseXML xmlStr of
-                    Right xml -> xml
-                    Left _    -> XText xmlStr -- В случае ошибки просто вернуть текст
+    (tagName, afterOpen) = parseOpenTag (skipSpaces input)
 
-prettyLines :: Int -> String -> [String]
-prettyLines indent xml = case parseXML xml of
-    Right (XElem tag attrs children) ->
-        let indentation = replicate (indent * 2) ' '
-            attrsStr = concatMap (\(k,v) -> " " ++ k ++ "=\"" ++ v ++ "\"") attrs
-            openTag = indentation ++ "<" ++ tag ++ attrsStr ++ ">"
-            childLines = concatMap (prettyLines (indent + 1) . nodeToXML . xmlToNode) children
-            closeTag = indentation ++ "</" ++ tag ++ ">"
-        in [openTag] ++ childLines ++ [closeTag]
-    Right (XText text) ->
-        [replicate (indent * 2) ' ' ++ escape text]
-    Left _ ->
-        [replicate (indent * 2) ' ' ++ xml]
+    (children, afterChildren) = parseContent tagName (skipSpaces afterOpen)
 
--- Простой XML парсер
--- Примечание: Этот парсер очень упрощён и не обрабатывает все возможные случаи XML.
-parseXML :: String -> Either String XML
-parseXML input = case parseElement (trim input) of
-    Just (elem, rest) | all isSpace rest -> Right elem
-    _ -> Left "Не удалось полностью разобрать XML."
+    afterClose = parseCloseTag tagName (skipSpaces afterChildren)
 
-parseElement :: String -> Maybe (XML, String)
-parseElement s =
-    parseTag s <|> parseText s
+    node =
+      case children of
+        []  -> NObject [(tagName, NString "")]
+        [c] -> NObject [(tagName, c)]
+        cs  -> NObject [(tagName, NArray cs)]
+  in
+    (node, afterClose)
 
-parseTag :: String -> Maybe (XML, String)
-parseTag s = do
-    let s' = dropWhile isSpace s
-    guard (not (null s') && head s' == '<')
-    let s'' = tail s'
-    -- Проверка на закрывающий тег
-    guard (not (take 2 s'' == "//"))
-    -- Парсинг имени тега
-    let (tagName, rest1) = span (\c -> not (isSpace c) && c /= '>' && c /= '/') s''
-    -- Парсинг атрибутов
-    let (attrs, rest2) = parseAttributes rest1
-    -- Проверка на самозакрывающийся тег
-    if take 2 rest2 == "/>"
-        then Just (XElem tagName attrs [], drop 2 rest2)
-    else if not (null rest2) && head rest2 == '>'
-        then do
-            -- Парсинг дочерних элементов
-            let restAfterTag = tail rest2
-            (children, rest3) <- parseChildren restAfterTag tagName
-            return (XElem tagName attrs children, rest3)
-    else
-        Nothing
+parseOpenTag :: String -> (String, String)
+parseOpenTag ('<':xs) =
+  let
+    (tag, rest) = spanWhile (\c -> isAlphaNum c || c `elem` "-_:") xs
+    rest'       = skipSpaces rest
+  in
+    case rest' of
+      ('>':r2) -> (tag, r2)
+      _        -> error $ "Expected '>' after tag name: <" ++ tag ++ "..."
+parseOpenTag _ = error "Expected opening tag <..."
 
-parseAttributes :: String -> ([(String, String)], String)
-parseAttributes s =
-    let s' = dropWhile isSpace s
-    in if null s' || head s' `elem` ['>', '/']
-        then ([], s')
-        else
-            let (attrName, rest) = span (\c -> not (isSpace c) && c /= '=') s'
-                rest' = dropWhile (/= '"') rest
-            in if null rest'
-                then ([], s')
-                else
-                    let value = takeWhile (/= '"') (tail rest')
-                        rest'' = drop 1 (dropWhile (/= '"') rest)
-                        (attrs, finalRest) = parseAttributes rest''
-                    in ((attrName, value) : attrs, finalRest)
-
-parseChildren :: String -> String -> Maybe ([XML], String)
-parseChildren s parentTag = go [] s
-  where
-    closingTag = "</" ++ parentTag ++ ">"
-    go acc str
-        | take (length closingTag) str == closingTag = Just (reverse acc, drop (length closingTag) str)
-        | otherwise =
-            case parseElement str of
-                Just (child, rest) -> go (child : acc) rest
-                Nothing ->
-                    -- Если не удалось разобрать элемент, попытаться разобрать текст
-                    case parseText str of
-                        Just (txt, restTxt) -> go (txt : acc) restTxt
-                        Nothing -> Nothing
-
-parseText :: String -> Maybe (XML, String)
-parseText s =
-    let (txt, rest) = span (/= '<') s
-    in if null txt
-        then Nothing
-        else Just (XText (trim txt), rest)
-
-isPrefixOf :: String -> String -> Bool
-isPrefixOf prefix str = prefix == take (length prefix) str
+parseContent :: String -> String -> ([Node], String)
+parseContent _ [] = ([], [])
+parseContent tagName input@( '<':'/':_ ) =
+  ([], input)
+parseContent tagName input@('<':_) =
+  let (child, rest) = parseElement input
+      (siblings, final) = parseContent tagName (skipSpaces rest)
+  in
+    (child : siblings, final)
+parseContent tagName input =
+  let (txt, rest) = spanWhile (/= '<') input
+      textNode = NString (trim txt)
+      (siblings, final) = parseContent tagName rest
+  in
+    (textNode : siblings, final)
 
 trim :: String -> String
-trim = f . f
-   where f = reverse . dropWhile isSpace
+trim = reverse . dropWhile isSpace . reverse . dropWhile isSpace
+
+parseCloseTag :: String -> String -> String
+parseCloseTag expectedTagName ('<':'/':xs) =
+  let
+    (tagName, rest) = spanWhile (\c -> isAlphaNum c || c `elem` "-_:") xs
+    rest'           = skipSpaces rest
+  in
+    if tagName /= expectedTagName
+       then error $ "Mismatched closing tag: expected </" ++ expectedTagName
+                 ++ ">, but got </" ++ tagName ++ ">"
+       else case rest' of
+              ('>':r2) -> r2
+              _        -> error $ "Expected '>' after </" ++ tagName ++ ">"
+parseCloseTag expectedTagName _ =
+  error $ "Expected closing tag </" ++ expectedTagName ++ ">"
+

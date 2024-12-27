@@ -7,8 +7,4 @@ data Node
   | NNull
   | NArray [Node]
   | NObject [(String, Node)]
-  deriving (Show, Eq, Read)
-
-data XML = XElem String [(String, String)] [XML]
-         | XText String
-         deriving (Show, Eq)
+  deriving (Show, Eq)

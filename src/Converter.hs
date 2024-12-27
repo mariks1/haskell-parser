@@ -1,4 +1,4 @@
-module Converter (nodeToJSON) where
+module Converter (nodeToJSON, prettyNodeToXML) where
 
 import Types
 
@@ -35,3 +35,40 @@ formatObject indent kvs =
     (init kvs)
     ++ replicate indent ' ' ++
        "\"" ++ fst (last kvs) ++ "\": " ++ formatNode indent (snd (last kvs))
+
+-- Функция для преобразования Node в XML
+-- Форматированный вывод XML с отступами
+prettyNodeToXML :: Node -> String
+prettyNodeToXML node = prettyNodeToXML' node 0
+
+-- Вспомогательная функция с уровнем отступа
+prettyNodeToXML' :: Node -> Int -> String
+prettyNodeToXML' (NString text) indent =
+    replicate indent ' ' ++ escape text
+prettyNodeToXML' (NNumber num) indent =
+    replicate indent ' ' ++ show num
+prettyNodeToXML' (NBool True) indent =
+    replicate indent ' ' ++ "true"
+prettyNodeToXML' (NBool False) indent =
+    replicate indent ' ' ++ "false"
+prettyNodeToXML' NNull indent =
+    replicate indent ' '
+prettyNodeToXML' (NArray nodes) indent =
+    concatMap (\node -> prettyNodeToXML' node (indent + 2)) nodes
+prettyNodeToXML' (NObject fields) indent =
+    concatMap (\(key, value) ->
+        replicate indent ' ' ++ "<" ++ escape key ++ ">\n" ++
+        prettyNodeToXML' value (indent + 2) ++ "\n" ++
+        replicate indent ' ' ++ "</" ++ escape key ++ ">\n"
+    ) fields
+
+-- Экранирование специальных символов для XML
+escape :: String -> String
+escape = concatMap escapeChar
+  where
+    escapeChar '<'  = "&lt;"
+    escapeChar '>'  = "&gt;"
+    escapeChar '&'  = "&amp;"
+    escapeChar '"'  = "&quot;"
+    escapeChar '\'' = "&apos;"
+    escapeChar c    = [c]
