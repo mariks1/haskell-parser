@@ -1,0 +1,27 @@
+{
+    "users": [
+      {
+        "id": 1,
+        "name": "User One",
+        "roles": ["admin", "editor"],
+        "profile": {
+          "age": 34,
+          "location": "New York"
+        }
+      },
+      {
+        "id": 2,
+        "name": "User Two",
+        "roles": ["user"],
+        "profile": {
+          "age": 28,
+          "location": "San Francisco"
+        }
+      }
+    ],
+    "settings": {
+      "theme": "dark",
+      "notifications": true
+    }
+  }
+  
