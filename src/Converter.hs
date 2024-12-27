@@ -4,11 +4,11 @@ import Types
 
 -- Преобразование Node в JSON-строку (с отступами)
 nodeToJSON :: Node -> String
-nodeToJSON node = formatNode 0 node
+nodeToJSON = formatNode 0
 
 -- Основная функция форматирования
 formatNode :: Int -> Node -> String
-formatNode indent (NString s) = show s -- Экранирует строку автоматически
+formatNode indent (NString s) = show s
 formatNode indent (NNumber n) = show n
 formatNode indent (NBool True) = "true"
 formatNode indent (NBool False) = "false"
@@ -20,14 +20,14 @@ formatNode indent (NObject kvs) =
 
 -- Преобразование массива Node в строку JSON (с отступами)
 formatArray :: Int -> [Node] -> String
-formatArray indent [] = replicate indent ' ' ++ "" -- Пустой массив
+formatArray indent [] = replicate indent ' '
 formatArray indent nodes =
   concatMap (\node -> replicate indent ' ' ++ formatNode indent node ++ ",\n") (init nodes)
     ++ replicate indent ' ' ++ formatNode indent (last nodes)
 
 -- Преобразование объекта (списка ключ-значение) в строку JSON (с отступами)
 formatObject :: Int -> [(String, Node)] -> String
-formatObject indent [] = replicate indent ' ' ++ "" -- Пустой объект
+formatObject indent [] = replicate indent ' '
 formatObject indent kvs =
   concatMap
     (\(key, value) ->
@@ -37,7 +37,6 @@ formatObject indent kvs =
        "\"" ++ fst (last kvs) ++ "\": " ++ formatNode indent (snd (last kvs))
 
 -- Функция для преобразования Node в XML
--- Форматированный вывод XML с отступами
 prettyNodeToXML :: Node -> String
 prettyNodeToXML node = prettyNodeToXML' node 0
 
@@ -68,7 +67,4 @@ escape = concatMap escapeChar
   where
     escapeChar '<'  = "&lt;"
     escapeChar '>'  = "&gt;"
-    escapeChar '&'  = "&amp;"
-    escapeChar '"'  = "&quot;"
-    escapeChar '\'' = "&apos;"
     escapeChar c    = [c]

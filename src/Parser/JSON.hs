@@ -33,16 +33,16 @@ parseArray :: String -> (Node, String)
 parseArray ('[':xs) = (NArray values, skipSpaces rest)
   where
     (values, rest) = parseElements (skipSpaces xs)
-    parseElements (']':ys) = ([], ys) -- Пустой массив
+    parseElements (']':ys) = ([], ys) 
     parseElements ys =
       let
-        (v, rest') = parseValue ys -- Парсим текущее значение
+        (v, rest') = parseValue ys 
         rest'' = skipSpaces rest'
       in
         case rest'' of
-          (',':rest''') -> -- Если запятая, продолжаем парсинг
+          (',':rest''') -> 
             let (vs, finalRest) = parseElements (skipSpaces rest''') in (v : vs, finalRest)
-          (']':rest''') -> -- Если конец массива
+          (']':rest''') -> 
             ([v], rest''')
           _ -> error "Expected ',' or ']' in array"
 parseArray _ = error "Expected array"
@@ -55,21 +55,20 @@ parseObject ('{':xs) = (NObject pairs, skipSpaces rest)
 
     -- Парсинг пар ключ-значение
     parsePairs :: String -> ([(String, Node)], String)
-    parsePairs ('}':ys) = ([], ys) -- Пустой объект
+    parsePairs ('}':ys) = ([], ys) 
     parsePairs ys =
         let
-            (key, rest1) = parseString ys -- Парсим ключ
+            (key, rest1) = parseString ys 
             rest2 = skipSpaces rest1
-            ':' : rest3 = rest2 -- Ожидаем двоеточие
-            (value, rest4) = parseValue (skipSpaces rest3) -- Парсим значение
+            ':' : rest3 = rest2 
+            (value, rest4) = parseValue (skipSpaces rest3)
             (pairs, finalRest) =
                 case skipSpaces rest4 of
-                    (',':rest5) -> parsePairs (skipSpaces rest5) -- Продолжаем парсинг
-                    ('}':rest5) -> ([], rest5) -- Конец объекта
+                    (',':rest5) -> parsePairs (skipSpaces rest5)
+                    ('}':rest5) -> ([], rest5) 
                     _ -> error "Expected ',' or '}' in object"
         in ((keyString key, value) : pairs, finalRest)
 
-        -- Извлечение строки из VString
     keyString (NString s) = s
     keyString _ = error "Expected string as object key"
 
