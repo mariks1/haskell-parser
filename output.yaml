@@ -1,29 +1,22 @@
-users:
+name: John
+age: 30.0
+isMarried: false
+children:
+  - Alice
+  - Bob
+  - Carol
+
+pets: ""
+address:
   -
-    id: 1.0
-    name: "User One"
-    roles:
-      - admin
-      - editor
-
-    profile:
-      age: 34.0
-      location: "New York"
-
+    street: "\"Main St.\""
 
   -
-    id: 2.0
-    name: "User Two"
-    roles:
-      - user
-
-    profile:
-      age: 28.0
-      location: "San Francisco"
+    city: "\"NY\""
 
 
-
-settings:
-  theme: dark
-  notifications: true
+scores:
+  - 10.0
+  - 11.0
+  - 12.0
 

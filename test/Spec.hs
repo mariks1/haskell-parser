@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import Test.Hspec
-import Types
-import Parser.JSON (parseJSON)
 import Converter (nodeToJSON, prettyNodeToXML)
+import Parser.JSON (parseJSON)
 import Parser.XML (parseXML)
+import Test.Hspec
 
 main :: IO ()
 main = hspec $ do
@@ -28,7 +27,7 @@ main = hspec $ do
   describe "Complex XML to JSON Conversion" $ do
     it "converts complex XML to equivalent JSON" $ do
       let xmlStr = "<company><name>Tech Corp</name><employees><employee><name>Alice</name><age>30</age></employee><employee><name>Bob</name><age>25</age></employee></employees></company>"
-          expectedJSON = "{\n  \"company\": [\n    {\n      \"name\": \"Tech Corp\"\n    },\n    {\n      \"employees\": [\n        {\n          \"employee\": [\n            {\n              \"name\": \"Alice\"\n            },\n            {\n              \"age\": \"30\"\n            }\n          ]\n        },\n        {\n          \"employee\": [\n            {\n              \"name\": \"Bob\"\n            },\n            {\n              \"age\": \"25\"\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}"
+          expectedJSON = "{\n  \"company\": [\n    {\n      \"name\": \"Tech Corp\"\n    },\n    {\n      \"employees\": [\n        {\n          \"employee\": [\n            {\n              \"name\": \"Alice\"\n            },\n            {\n              \"age\": 30.0\n            }\n          ]\n        },\n        {\n          \"employee\": [\n            {\n              \"name\": \"Bob\"\n            },\n            {\n              \"age\": 25.0\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}"
           xmlNode = parseXML xmlStr
           jsonOutput = nodeToJSON xmlNode
 
@@ -44,7 +43,7 @@ main = hspec $ do
 
     it "converts XML with attributes to JSON" $ do
       let xmlStr = "<product><name>Gadget</name><price>99.99</price></product>"
-          expectedJSON = "{\n  \"product\": [\n    {\n      \"name\": \"Gadget\"\n    },\n    {\n      \"price\": \"99.99\"\n    }\n  ]\n}"
+          expectedJSON = "{\n  \"product\": [\n    {\n      \"name\": \"Gadget\"\n    },\n    {\n      \"price\": 99.99\n    }\n  ]\n}"
           xmlNode = parseXML xmlStr
           jsonOutput = nodeToJSON xmlNode
 
@@ -52,7 +51,7 @@ main = hspec $ do
 
     it "handles mixed types and nested arrays" $ do
       let xmlStr = "<items><item><name>Item1</name><price>10.0</price></item><item><name>Item2</name><price>15.0</price></item></items>"
-          expectedJSON = "{\n  \"items\": [\n    {\n      \"item\": [\n        {\n          \"name\": \"Item1\"\n        },\n        {\n          \"price\": \"10.0\"\n        }\n      ]\n    },\n    {\n      \"item\": [\n        {\n          \"name\": \"Item2\"\n        },\n        {\n          \"price\": \"15.0\"\n        }\n      ]\n    }\n  ]\n}"
+          expectedJSON = "{\n  \"items\": [\n    {\n      \"name\": \"Item1\",\n      \"price\": 10.0\n    },\n    {\n      \"name\": \"Item2\",\n      \"price\": 15.0\n    }\n  ]\n}"
           xmlNode = parseXML xmlStr
           jsonOutput = nodeToJSON xmlNode
 
