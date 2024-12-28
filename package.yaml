@@ -20,6 +20,7 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/githubuser/lab4#readme>
 
 dependencies:
+- hspec >= 2.11.9
 - base >= 4.7 && < 5
 - filepath
 - deepseq
