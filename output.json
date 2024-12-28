@@ -1,20 +1,16 @@
 {
-  "name": "John",
-  "age": 30.0,
-  "isMarried": false,
-  "children": [
-    "Alice",
-    "Bob",
-    "Carol"
-  ],
-  "pets": null,
-  "address": {
-    "street": "\"Main St.\"",
-    "city": "\"NY\""
-  },
-  "scores": [
-    10.0,
-    11.0,
-    12.0
+  "note": [
+    {
+      "to": "Tove"
+    },
+    {
+      "from": "Jani"
+    },
+    {
+      "heading": "Reminder"
+    },
+    {
+      "body": "Don't forget me this weekend!"
+    }
   ]
 }

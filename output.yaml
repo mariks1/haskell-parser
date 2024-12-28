@@ -1,14 +1,29 @@
-note:
+users:
   -
-    to: Tove
+    id: 1.0
+    name: "User One"
+    roles:
+      - admin
+      - editor
+
+    profile:
+      age: 34.0
+      location: "New York"
+
 
   -
-    from: Jani
+    id: 2.0
+    name: "User Two"
+    roles:
+      - user
 
-  -
-    heading: Reminder
+    profile:
+      age: 28.0
+      location: "San Francisco"
 
-  -
-    body: "Don't forget me this weekend!"
 
+
+settings:
+  theme: dark
+  notifications: true
 

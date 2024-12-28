@@ -1,49 +1,71 @@
-<name>
-  John
-</name>
-<age>
-  30.0
-</age>
-<isMarried>
-  false
-</isMarried>
-<children>
-  <array>
-    <item>
-      Alice
-    </item>
-    <item>
-      Bob
-    </item>
-    <item>
-      Carol
-    </item>
-  </array>
+<root>
+  <users>
+    <array>
+      <item>
+        <id>
+          1.0
+        </id>
+        <name>
+          User One
+        </name>
+        <roles>
+          <array>
+            <item>
+              admin
+            </item>
+            <item>
+              editor
+            </item>
+          </array>
 
-</children>
-<pets>
-  
-</pets>
-<address>
-  <street>
-    "Main St."
-  </street>
-  <city>
-    "NY"
-  </city>
+        </roles>
+        <profile>
+          <age>
+            34.0
+          </age>
+          <location>
+            New York
+          </location>
 
-</address>
-<scores>
-  <array>
-    <item>
-      10.0
-    </item>
-    <item>
-      11.0
-    </item>
-    <item>
-      12.0
-    </item>
-  </array>
+        </profile>
 
-</scores>
+      </item>
+      <item>
+        <id>
+          2.0
+        </id>
+        <name>
+          User Two
+        </name>
+        <roles>
+          <array>
+            <item>
+              user
+            </item>
+          </array>
+
+        </roles>
+        <profile>
+          <age>
+            28.0
+          </age>
+          <location>
+            San Francisco
+          </location>
+
+        </profile>
+
+      </item>
+    </array>
+
+  </users>
+  <settings>
+    <theme>
+      dark
+    </theme>
+    <notifications>
+      true
+    </notifications>
+
+  </settings>
+</root>

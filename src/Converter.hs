@@ -46,7 +46,10 @@ formatObject indent kvs =
     ++ formatNode indent (snd (last kvs))
 
 prettyNodeToXML :: Node -> String
-prettyNodeToXML node = prettyNodeToXML' node 0
+prettyNodeToXML node =
+  "<root>\n"
+    ++ prettyNodeToXML' node 2
+    ++ "</root>\n"
 
 prettyNodeToXML' :: Node -> Int -> String
 prettyNodeToXML' (NString text) indent =
@@ -60,32 +63,22 @@ prettyNodeToXML' (NBool False) indent =
 prettyNodeToXML' NNull indent =
   replicate indent ' '
 prettyNodeToXML' (NArray nodes) indent =
-  replicate indent ' '
-    ++ "<array>\n"
+  replicate indent ' ' ++ "<array>\n"
     ++ concatMap (renderItem (indent + 2)) nodes
-    ++ replicate indent ' '
-    ++ "</array>\n"
+    ++ replicate indent ' ' ++ "</array>\n"
   where
     renderItem itemIndent node =
-      replicate itemIndent ' '
-        ++ "<item>\n"
+      replicate itemIndent ' ' ++ "<item>\n"
         ++ prettyNodeToXML' node (itemIndent + 2)
         ++ "\n"
-        ++ replicate itemIndent ' '
-        ++ "</item>\n"
+        ++ replicate itemIndent ' ' ++ "</item>\n"
 prettyNodeToXML' (NObject fields) indent =
   concatMap
     ( \(key, value) ->
-        replicate indent ' '
-          ++ "<"
-          ++ escape key
-          ++ ">\n"
+        replicate indent ' ' ++ "<" ++ escape key ++ ">\n"
           ++ prettyNodeToXML' value (indent + 2)
           ++ "\n"
-          ++ replicate indent ' '
-          ++ "</"
-          ++ escape key
-          ++ ">\n"
+          ++ replicate indent ' ' ++ "</" ++ escape key ++ ">\n"
     )
     fields
 
@@ -94,7 +87,7 @@ escape = concatMap escapeChar
   where
     escapeChar '<' = "&lt;"
     escapeChar '>' = "&gt;"
-    escapeChar c = [c]
+    escapeChar c   = [c]
 
 -- | Основная функция конвертации Node в YAML
 nodeToYAML :: Node -> String
