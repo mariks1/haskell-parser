@@ -1,6 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
-
-import Converter (nodeToJSON, prettyNodeToXML)
+import Converter (nodeToJSON, nodeToYAML, prettyNodeToXML)
 import Parser.JSON (parseJSON)
 import Parser.XML (parseXML)
 import Test.Hspec
@@ -56,3 +54,11 @@ main = hspec $ do
           jsonOutput = nodeToJSON xmlNode
 
       jsonOutput `shouldBe` expectedJSON
+
+    it "converts parsed JSON to YAML" $ do
+      let jsonStr = "{\"employees\":[{\"name\":\"Alice\",\"age\":30},{\"name\":\"Bob\",\"age\":25}],\"company\":{\"name\":\"Tech Corp\",\"location\":\"New York\"}}"
+          expectedYAML = "employees:\n  -\n    name: Alice\n    age: 30.0\n\n  -\n    name: Bob\n    age: 25.0\n\n\ncompany:\n  name: \"Tech Corp\"\n  location: \"New York\"\n\n"
+          jsonNode = parseJSON jsonStr
+          yamlOutput = nodeToYAML jsonNode
+
+      yamlOutput `shouldBe` expectedYAML
