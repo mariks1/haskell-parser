@@ -31,3 +31,15 @@ jobs:
       - name: Check formatting with Ormolu
         run: |
           ormolu --mode check $(find . -name "*.hs")
+          
+  build-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: haskell-actions/setup@v1
+        with:
+          ghc-version: '9.4.8'
+          enable-stack: true
+          stack-version: 'latest'
+      - run: stack --no-terminal test --fast
